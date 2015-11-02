@@ -1,3 +1,4 @@
+/*jshint browser: true*/
 var modalDialog = (function () {
 
     "use strict";
@@ -5,6 +6,7 @@ var modalDialog = (function () {
     var method = {},
         options,
         defaults,
+        timer,
         transitionEnd;
 
     // private methods
@@ -16,6 +18,10 @@ var modalDialog = (function () {
     // check if element exists
     function exists(el) {
         return el === null ? true : false;
+    }
+    // check if number
+    function validateNumber(n) {
+        return !isNaN(parseFloat(n)) && isFinite(n);
     }
     // add class
     function addClass(element, classname) {
@@ -106,14 +112,13 @@ var modalDialog = (function () {
 
         // Create alert elements
         if (options.alert === true) {
-
             // btn container
             btnContainer = document.createElement('div');
             btnContainer.setAttribute('id', 'modal-btn-container');
 
             // create ok button
             okBtn = document.createElement('div');
-            okBtn.innerHTML = 'OK';
+            okBtn.innerHTML = options.alertText;
             okBtn.setAttribute('id', 'modal-alert-ok');
 
             // append to modal
@@ -149,10 +154,11 @@ var modalDialog = (function () {
                     return transitions[t];
                 }
             }
-        }
+        } 
     }
     transitionEnd = animationEnd();
 
+   
     // close modal
     function closeModal() {
 
@@ -162,7 +168,7 @@ var modalDialog = (function () {
 
         if (getId('modal-div-overlay').style.transition !== undefined) { // IE9 compatibility
             // remove element once transition animation has ended
-            getId('modal-div-overlay').addEventListener(transitionEnd, function () {
+            getId('modal-div-overlay').addEventListener(transitionEnd, function (e) {
                 // check if element exist
                 if (!exists(getId('modal-div-overlay'))) {
                     getId('modal-div-container').parentElement.removeChild(getId('modal-div-container'));
@@ -180,9 +186,11 @@ var modalDialog = (function () {
 
     // initilize events 
     function initializeEvents() {
-        getId('modal-div-overlay').addEventListener('click', closeModal, false);
+        if (options.disableOverlay === false) {
+           getId('modal-div-overlay').addEventListener('click', method.close, false); 
+        } 
         if (options.hideClose === false) {
-            getId('modal-close').addEventListener('click', closeModal, false);
+            getId('modal-close').addEventListener('click', method.close, false);
         }
         // if true initialize listeners for verify buttons
         if (options.verify === true) {
@@ -194,6 +202,7 @@ var modalDialog = (function () {
             getId('modal-alert-ok').addEventListener('click', options.alertCallback, false);
         }
     }
+
 
     // public methods
 
@@ -210,7 +219,10 @@ var modalDialog = (function () {
             confirmText: 'Ok',
             cancelText: 'Cancel',
             alert: false,
-            alertCallback: ''
+            alertCallback: '',
+            alertText: 'OK',
+            closeAfter: null,
+            disableOverlay: false
         };
 
         // extend defaults and assign it to options
@@ -221,11 +233,28 @@ var modalDialog = (function () {
         // build out modal and initialize events
         buildModal();
         initializeEvents();
+
+        // if option for closeAfter is valid then setTimeout function
+        if (options.closeAfter !== null) {
+            if (validateNumber(options.closeAfter)) {
+                options.closeAfter = options.closeAfter * 1000;
+                timer = setTimeout(function () {
+                    if (!exists(getId('modal-div-overlay'))) {
+                        closeModal();
+                    }
+                }, options.closeAfter);
+            } else {
+                throw 'Value for "CloseAfter" is not a valid number.';
+            }
+        }
     };
 
     // close modal
     method.close = function () {
         closeModal();
+        if (options.closeAfter !== null) {
+            clearTimeout(timer);
+        }
     };
 
     return method;
