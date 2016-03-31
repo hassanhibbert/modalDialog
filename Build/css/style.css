@@ -114,8 +114,8 @@
 #modal-close {
     width: 35px;
     height: 35px;
-    background: url('img/button-modal-close.png');
-    background-image: url('img/button-modal-close.svg'), none;
+    background: url('../img/button-modal-close.png');
+    background-image: url('../img/button-modal-close.svg'), none;
     background-repeat: no-repeat;
     float: right;
     cursor: pointer;
