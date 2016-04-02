@@ -1,7 +1,7 @@
-   var btn = document.getElementById('btn');
+   var btn1 = document.getElementById('btn');
    var btn2 = document.getElementById('btn2');
 
-   btn.addEventListener('click', function () {
+   btn1.addEventListener('click', function () {
        modalDialog.open({
            content: 'Hello this is just a modal.',
            verify: true,
